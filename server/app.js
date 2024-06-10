@@ -6,7 +6,7 @@ const users = require('./routes/users')
 
 app.use(express.json())
 
-app.use('/auth', users)
+app.use('/api', users)
 
 const port = process.env.PORT || 5000
 

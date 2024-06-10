@@ -6,13 +6,30 @@ const UserSchema = new mongoose.Schema({
         required: [true, 'Must provide username'],
         trim: true
     },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
     password: {
         type: String,
         required: [true, 'Must provide password'],
         trim: true
     },
-    budgets: [{ type: mongoose.Schema.Types.ObjectId, ref: "Budget" }],
-    expenses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Expense" }]
+    expenses: [
+        {
+            amount: { type: Number, required: true },
+            category: { type: String, required: true },
+            date: { type: Date, default: Date.now }
+        }
+    ],
+    budget: [
+        {
+            name: { type: String, required: true },
+            amountBudgetedIn: { type: Number, required: true, default: 0 },
+        }
+    ]
 })
 
 module.exports = mongoose.model('User', UserSchema)
