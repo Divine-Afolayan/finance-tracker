@@ -51,6 +51,10 @@ const login = async (req, res) => {
     }
 }
 
+// deletion of account
+
+const deleteAccount = async (req, res) => { }
+
 // budget controllers
 
 // getting all budgets
