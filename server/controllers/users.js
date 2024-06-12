@@ -2,20 +2,21 @@ const User = require('../models/User')
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const postUserSignup = async (req, res) => {
-    try {
-        const { username, email, password } = req.body;
+// register user
+const signup = async (req, res) => {
+    const { username, email, password } = req.body;
 
+    try {
         const user = await User.findOne({ username });
 
         if (user) {
             return res.status(400).json({ msg: "User already exists!" });
         }
 
+        // gen salt with bcrypt
         const salt = await bcrypt.genSalt(10);
 
         const hashedPassword = await bcrypt.hash(password, salt);
-        // await new User({ username, password: hashedPassword }).save();
         await User.create({ username, email, password: hashedPassword });
 
         res.status(201).json({ msg: "User created successfully!" });
@@ -25,10 +26,11 @@ const postUserSignup = async (req, res) => {
 };
 
 
-const postUserLogin = async (req, res) => {
-    try {
-        const { email, password } = req.body
+// login user
+const login = async (req, res) => {
+    const { email, password } = req.body
 
+    try {
         const user = await User.findOne({ email })
 
         if (!user) {
@@ -41,26 +43,87 @@ const postUserLogin = async (req, res) => {
             return res.json({ msg: 'Invalid username or password!' })
         }
 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '4h' })
+        // create jwt token
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '6h' })
         res.json({ token, userID: user._id })
     } catch (error) {
         res.status(500).json({ message: "Something went wrong" });
     }
 }
 
-// add expense
-const postUserExpense = async (req, res) => {
+// budget controllers
+
+// getting all budgets
+
+const getAllBudgets = async (req, res) => {
+    const { id: userID } = req.params;
+
     try {
-        // todo: find out where we get userID
-        // todo: Trust in yourself, you can do it
-        const { userId, amount, category } = req.body;
+        const user = await User.findById(userID);
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' })
+        }
+
+        res.status(200).json({ budgets: user.budgets })
     } catch (error) {
-        res.status(500).json({ error: 'Error adding expense' });
+        res.status(500).json({ err: error.message });
     }
 }
 
-// add budget
-const postUserBudget = async (req, res) => { }
+// adding budget
+const addBudget = async (req, res) => {
+    const { name, amount } = req.body
+    const { id: userID } = req.params
 
+    try {
+        const user = await User.findById({ userID })
 
-module.exports = { postUserSignup, postUserLogin, postUserExpense, postUserBudget } 
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' })
+        }
+
+        const newBudget = {
+            name,
+            amount,
+            expenses: []
+        }
+
+        user.budgets.push(newBudget)
+        await user.save()
+
+        res.status(201).json({ msg: 'Budget creation is a success' })
+    } catch (error) {
+        res.status(500).json({ err: error.message })
+    }
+}
+
+// updating budgets
+
+const updateBudget = async (req, res) => {
+    const { name, amount } = req.body;
+    const { userID, budgetID } = req.params
+
+    try {
+        const user = await User.findById(userID)
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' })
+        }
+
+        const budget = user.budgets.id(budgetID)
+
+        budget.name = name || budget.name
+        budget.amount = amount || budget.amount
+
+        await user.save()
+
+        res.status(200).json({ msg: 'budget update is a success', budgets: user.budgets })
+    } catch (error) {
+        res.status(500).json({ err: error.message })
+    }
+}
+
+// deleting budgets
+
+module.exports = { signup, login, getAllBudgets, addBudget, updateBudget } 
