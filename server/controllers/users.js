@@ -113,6 +113,10 @@ const updateBudget = async (req, res) => {
 
         const budget = user.budgets.id(budgetID)
 
+        if (!budget) {
+            return res.status(404).json({ msg: 'Budget not found' });
+        }
+
         budget.name = name || budget.name
         budget.amount = amount || budget.amount
 
@@ -126,4 +130,31 @@ const updateBudget = async (req, res) => {
 
 // deleting budgets
 
-module.exports = { register, login, getAllBudgets, addBudget, updateBudget } 
+const deleteBudget = async (req, res) => {
+    const { userID, budgetID } = req.params
+
+    try {
+        const user = await User.findById(userID)
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' })
+        }
+
+        const budget = user.budgets.id(budgetID)
+
+        if (!budget) {
+            return res.status(404).json({ msg: 'Budget not found' });
+        }
+
+        budget.remove()
+
+        await user.save()
+
+
+        res.status(200).json({ msg: 'Budget deletion successful', budgets: user.budgets });
+    } catch (error) {
+        res.status(500).json({ err: error.message })
+    }
+}
+
+module.exports = { register, login, getAllBudgets, addBudget, updateBudget, deleteBudget } 
