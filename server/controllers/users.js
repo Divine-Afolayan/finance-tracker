@@ -21,7 +21,7 @@ const register = async (req, res) => {
 
         res.status(201).json({ msg: "User created successfully!" });
     } catch (error) {
-        res.status(500).json({ error: 'Error registering new user' });
+        res.status(500).json({ err: error.message })
     }
 };
 
@@ -47,13 +47,29 @@ const login = async (req, res) => {
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '6h' })
         res.json({ token, userID: user._id })
     } catch (error) {
-        res.status(500).json({ message: "Something went wrong" });
+        res.status(500).json({ err: error.message })
     }
 }
 
 // deletion of account
 
-const deleteAccount = async (req, res) => { }
+const deleteAccount = async (req, res) => {
+    const { userID } = req.params;
+
+    try {
+        const user = await User.findById(userID)
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User doesn\'t exist!' })
+        }
+
+        user.remove();
+
+        res.status(200).json({ msg: 'User deletion successful' })
+    } catch (error) {
+        res.status(500).json({ err: error.message })
+    }
+}
 
 // budget controllers
 
@@ -81,7 +97,7 @@ const addBudget = async (req, res) => {
     const { userID } = req.params
 
     try {
-        const user = await User.findById({ userID })
+        const user = await User.findById(userID)
 
         if (!user) {
             return res.status(404).json({ msg: 'User not found' })
@@ -161,4 +177,4 @@ const deleteBudget = async (req, res) => {
     }
 }
 
-module.exports = { register, login, getAllBudgets, addBudget, updateBudget, deleteBudget } 
+module.exports = { register, login, getAllBudgets, addBudget, updateBudget, deleteBudget, deleteAccount } 
