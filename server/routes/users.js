@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-const { signup, login, getAllBudgets, addBudget, updateBudget } = require('../controllers/users')
+const { register, login, getAllBudgets, addBudget, updateBudget } = require('../controllers/users')
 
-router.route('/signup').post(signup)
+router.route('/register').post(register)
 router.route('/login').post(login)
-router.route('/:id/AllBudgets').get(getAllBudgets)
-router.route('/:id/addBudget').post(addBudget)
-router.route('/:userID/:budgetID/updateBudget').put(updateBudget)
+router.route('/budgets/:userID').get(getAllBudgets)
+router.route('/add-budget/:userID').post(addBudget)
+router.route('/update-budget/:userID/:budgetID').put(updateBudget)
 
 module.exports = router

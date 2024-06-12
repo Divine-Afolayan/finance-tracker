@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 // register user
-const signup = async (req, res) => {
+const register = async (req, res) => {
     const { username, email, password } = req.body;
 
     try {
@@ -56,7 +56,7 @@ const login = async (req, res) => {
 // getting all budgets
 
 const getAllBudgets = async (req, res) => {
-    const { id: userID } = req.params;
+    const { userID } = req.params;
 
     try {
         const user = await User.findById(userID);
@@ -74,7 +74,7 @@ const getAllBudgets = async (req, res) => {
 // adding budget
 const addBudget = async (req, res) => {
     const { name, amount } = req.body
-    const { id: userID } = req.params
+    const { userID } = req.params
 
     try {
         const user = await User.findById({ userID })
@@ -126,4 +126,4 @@ const updateBudget = async (req, res) => {
 
 // deleting budgets
 
-module.exports = { signup, login, getAllBudgets, addBudget, updateBudget } 
+module.exports = { register, login, getAllBudgets, addBudget, updateBudget } 
