@@ -8,7 +8,11 @@ const {
     addBudget,
     updateBudget,
     deleteBudget,
-    deleteAccount
+    deleteAccount,
+    getAllExpenses,
+    addExpense,
+    updateExpense,
+    deleteExpense
 } = require('../controllers/users')
 
 router.route('/register').post(register)
@@ -18,5 +22,9 @@ router.route('/budgets/:userID').get(getAllBudgets)
 router.route('/add-budget/:userID').post(addBudget)
 router.route('/update-budget/:userID/:budgetID').put(updateBudget)
 router.route('/delete-budget/:userID/:budgetID').delete(deleteBudget)
+router.route('/expenses/:userID/:budgetID').get(getAllExpenses)
+router.route('/add-expense/:userID/:budgetID').post(addExpense)
+router.route('/delete-budget/:userID/:budgetID/:expenseID').put(updateExpense)
+router.route('/delete-budget/:userID/:budgetID/:expenseID').delete(deleteExpense)
 
 module.exports = router

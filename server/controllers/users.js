@@ -177,4 +177,143 @@ const deleteBudget = async (req, res) => {
     }
 }
 
-module.exports = { register, login, getAllBudgets, addBudget, updateBudget, deleteBudget, deleteAccount } 
+// expense controllers
+
+// getting all expenses
+const getAllExpenses = async (req, res) => {
+    const { userID, budgetID } = req.params;
+
+    try {
+        const user = User.findById(userID);
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' })
+        }
+
+        const budget = user.budgets.id(budgetID)
+
+        if (!budget) {
+            return res.status(404).json({ msg: 'Budget not found' })
+        }
+
+        res.status(200).json({ expenses: budget.expenses })
+    } catch (error) {
+        res.status(500).json({ err: error.message })
+    }
+}
+
+// adding expenses
+
+const addExpense = async (req, res) => {
+    const { userID, budgetID } = req.params;
+    const { description, amount, category } = req.body;
+
+    try {
+        const user = User.findById(userID);
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' })
+        }
+
+        const budget = user.budgets.id(budgetID)
+
+        if (!budget) {
+            return res.status(404).json({ msg: 'Budget not found' })
+        }
+
+        const newExpense = {
+            description,
+            amount,
+            category,
+            date: new Date()
+        }
+
+        budget.expenses.push(newExpense)
+
+        await user.save()
+        res.status(201).json({ msg: 'Expense creation successful', expenses: budget.expenses })
+    } catch (error) {
+        res.status(500).json({ err: error.message })
+    }
+}
+
+const updateExpense = async (req, res) => {
+    const { description, amount, category } = req.body;
+    const { userID, budgetID, expenseID } = req.params
+
+    try {
+        const user = await User.findById(userID)
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' })
+        }
+
+        const budget = user.budgets.id(budgetID)
+
+        if (!budget) {
+            return res.status(404).json({ msg: 'Budget not found' });
+        }
+
+        const expense = budget.expenses.id(expenseID)
+
+        if (!expense) {
+            return res.status(404).json({ msg: 'expense not found' });
+        }
+
+        expense.description = description || expense.description
+        expense.amount = amount || expense.amount
+        expense.category = category || expense.category
+
+        await user.save()
+
+        res.status(200).json({ msg: 'Expense update is a success', budgets: user.budgets })
+    } catch (error) {
+        res.status(500).json({ err: error.message })
+    }
+}
+
+const deleteExpense = async (req, res) => {
+    const { userID, budgetID, expenseID } = req.params
+
+    try {
+        const user = await User.findById(userID)
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' })
+        }
+
+        const budget = user.budgets.id(budgetID)
+
+        if (!budget) {
+            return res.status(404).json({ msg: 'Budget not found' });
+        }
+
+        const expense = budget.expenses.id(expenseID)
+
+        if (!expense) {
+            return res.status(404).json({ msg: 'expense not found' });
+        }
+
+        expense.remove()
+
+        await user.save()
+
+        res.status(200).json({ msg: 'Expense deletion successful', budgets: user.budgets });
+    } catch (error) {
+        res.status(500).json({ err: error.message })
+    }
+}
+
+module.exports = {
+    register,
+    login,
+    getAllBudgets,
+    addBudget,
+    updateBudget,
+    deleteBudget,
+    deleteAccount,
+    getAllExpenses,
+    addExpense,
+    updateExpense,
+    deleteExpense
+} 
